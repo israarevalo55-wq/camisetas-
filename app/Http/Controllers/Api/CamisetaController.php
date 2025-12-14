@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Camiseta;
 use Illuminate\Http\Request;
+use Saeedvir\Supabase\Facades\Supabase;
 
 class CamisetaController extends Controller
 {
@@ -35,12 +36,30 @@ class CamisetaController extends Controller
             'precio_normal' => 'required|numeric',
             'disponible' => 'required|boolean',
             'stock' => 'required|integer',
-            'imagen_url' => 'nullable|string',
+            'imagen' => 'nullable|image|max:2048',
             'genero_id' => 'array|exists:generos,id',
             'plataforma_id' => 'required|exists:plataformas,id',
         ]);
 
-        $camiseta = Camiseta::create($request->all());
+        $data = $request->all();
+
+        // Subir imagen a Supabase si existe
+        if ($request->hasFile('imagen')) {
+            $file = $request->file('imagen');
+            $filename = time() . '.' . $file->getClientOriginalExtension();
+            $bucket = env('SUPABASE_BUCKET');
+
+            Supabase::storage()->upload(
+                $bucket,
+                $filename,
+                $file->getPathname()
+            );
+
+            // Guardar URL pública en la tabla
+            $data['imagen_url'] = env('SUPABASE_URL') . "/storage/v1/object/public/{$bucket}/{$filename}";
+        }
+
+        $camiseta = Camiseta::create($data);
 
         if ($request->has('genero_id')) {
             $camiseta->generos()->sync($request->input('genero_id'));
@@ -88,12 +107,28 @@ class CamisetaController extends Controller
             'precio_normal' => 'sometimes|numeric',
             'disponible' => 'sometimes|boolean',
             'stock' => 'sometimes|integer',
-            'imagen_url' => 'sometimes|nullable|string',
+            'imagen' => 'sometimes|image|max:2048',
             'genero_id' => 'sometimes|array|exists:generos,id',
             'plataforma_id' => 'sometimes|exists:plataformas,id',
         ]);
 
-        $camiseta->update($request->all());
+        $data = $request->all();
+
+        // Subir nueva imagen si se envía
+        if ($request->hasFile('imagen')) {
+            $file = $request->file('imagen');
+            $filename = time() . '.' . $file->getClientOriginalExtension();
+            $bucket = env('SUPABASE_BUCKET');
+
+            Supabase::storage()->upload(
+            $bucket,
+            $filename,
+            file_get_contents($file)
+      );
+            $data['imagen_url'] = env('SUPABASE_URL') . "/storage/v1/object/public/{$bucket}/{$filename}";
+        }
+
+        $camiseta->update($data);
 
         if ($request->has('genero_id')) {
             $camiseta->generos()->sync($request->input('genero_id'));
