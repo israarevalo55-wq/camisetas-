@@ -28,6 +28,7 @@
             color: white;
             margin-bottom: 40px;
             padding-top: 20px;
+            position: relative;
         }
 
         header h1 {
@@ -39,6 +40,51 @@
         header p {
             font-size: 1.1em;
             opacity: 0.9;
+        }
+
+        .auth-menu {
+            position: absolute;
+            top: 20px;
+            right: 0;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .auth-menu a,
+        .auth-menu button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border: 2px solid white;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .auth-menu a:hover,
+        .auth-menu button:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .auth-menu button {
+            background: transparent;
+            border: none;
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 6px;
+            backdrop-filter: blur(10px);
+        }
+
+        .user-info span {
+            font-size: 0.9em;
         }
 
         .grid {
@@ -193,6 +239,112 @@
             justify-content: center;
             font-size: 0.9em;
         }
+
+        .filters-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .filters-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+        }
+
+        .filter-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .filter-group select option {
+            background: #667eea;
+            color: white;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .btn-search,
+        .btn-reset {
+            flex: 1;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+        }
+
+        .btn-search {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-reset {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-reset:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .results-info {
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .no-results {
+            text-align: center;
+            color: white;
+            grid-column: 1/-1;
+            padding: 40px 20px;
+            font-size: 1.2em;
+        }
     </style>
 </head>
 <body>
@@ -200,14 +352,86 @@
         <header>
             <h1>🎮 GameZone Store</h1>
             <p>Encuentra las mejores camisetas gamer</p>
+            
+            <div class="auth-menu" id="authMenu">
+                <!-- Se rellena con JavaScript -->
+            </div>
         </header>
 
         <div id="error-container"></div>
+
+        <!-- Filtros y búsqueda -->
+        <div class="filters-section">
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label for="search">🔍 Buscar por nombre:</label>
+                    <input type="text" id="search" placeholder="Ej: Pokémon, Mario...">
+                </div>
+
+                <div class="filter-group">
+                    <label for="minPrice">💰 Precio mínimo:</label>
+                    <input type="number" id="minPrice" placeholder="0" min="0">
+                </div>
+
+                <div class="filter-group">
+                    <label for="maxPrice">💵 Precio máximo:</label>
+                    <input type="number" id="maxPrice" placeholder="Ilimitado" min="0">
+                </div>
+
+                <div class="filter-group">
+                    <label for="filterType">📌 Tipo de precio:</label>
+                    <select id="filterType">
+                        <option value="todos">Todos los precios</option>
+                        <option value="normal">Solo precio normal</option>
+                        <option value="oferta">Solo en oferta</option>
+                    </select>
+                </div>
+
+                <div class="filter-buttons">
+                    <button class="btn-search" onclick="filtrarCamisetas()">Buscar</button>
+                    <button class="btn-reset" onclick="limpiarFiltros()">Limpiar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="results-info" class="results-info"></div>
         <div id="loading" class="loading">Cargando camisetas...</div>
         <div id="grid" class="grid"></div>
     </div>
 
     <script>
+        let camisetasOriginales = [];
+
+        // Función para verificar si el usuario está autenticado
+        function actualizarMenuAuth() {
+            const authMenu = document.getElementById('authMenu');
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+
+            if (token && user) {
+                const userData = JSON.parse(user);
+                authMenu.innerHTML = `
+                    <div class="user-info">
+                        <span>👤 ${userData.name}</span>
+                    </div>
+                    <button onclick="logout()">Cerrar Sesión</button>
+                `;
+            } else {
+                authMenu.innerHTML = `
+                    <a href="login.html">Iniciar Sesión</a>
+                    <a href="register.html">Registrarse</a>
+                `;
+            }
+        }
+
+        // Función para cerrar sesión
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            actualizarMenuAuth();
+            window.location.reload();
+        }
+
         // Función para cargar las camisetas
         async function loadCamisetas() {
             try {
@@ -220,18 +444,8 @@
                     throw new Error('Error al cargar las camisetas');
                 }
 
-                const grid = document.getElementById('grid');
-                grid.innerHTML = '';
-
-                if (data.data.length === 0) {
-                    grid.innerHTML = '<p style="color: white; grid-column: 1/-1; text-align: center;">No hay camisetas disponibles</p>';
-                    return;
-                }
-
-                data.data.forEach(camiseta => {
-                    const card = crearCard(camiseta);
-                    grid.appendChild(card);
-                });
+                camisetasOriginales = data.data;
+                mostrarCamisetas(camisetasOriginales);
 
             } catch (error) {
                 console.error('Error:', error);
@@ -243,6 +457,77 @@
                 `;
             }
         }
+
+        // Función para mostrar camisetas
+        function mostrarCamisetas(camisetas) {
+            const grid = document.getElementById('grid');
+            const resultsInfo = document.getElementById('results-info');
+            
+            grid.innerHTML = '';
+
+            if (camisetas.length === 0) {
+                grid.innerHTML = '<div class="no-results">No se encontraron camisetas con esos filtros ❌</div>';
+                resultsInfo.textContent = '';
+                return;
+            }
+
+            resultsInfo.textContent = `Mostrando ${camisetas.length} camiseta${camisetas.length !== 1 ? 's' : ''}`;
+
+            camisetas.forEach(camiseta => {
+                const card = crearCard(camiseta);
+                grid.appendChild(card);
+            });
+        }
+
+        // Función para filtrar camisetas
+        function filtrarCamisetas() {
+            const search = document.getElementById('search').value.toLowerCase();
+            const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
+            const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+            const filterType = document.getElementById('filterType').value;
+
+            let camisetasFiltradas = camisetasOriginales.filter(camiseta => {
+                // Filtro por nombre
+                const nombreCumple = camiseta.nombre.toLowerCase().includes(search) || 
+                                    (camiseta.descripcion && camiseta.descripcion.toLowerCase().includes(search));
+
+                // Obtener el precio actual
+                const precioActual = camiseta.precio_oferta || camiseta.precio_normal;
+
+                // Filtro por rango de precio
+                const precioCumple = precioActual >= minPrice && precioActual <= maxPrice;
+
+                // Filtro por tipo de precio
+                let tipoPrecioCumple = true;
+                if (filterType === 'normal') {
+                    tipoPrecioCumple = !camiseta.precio_oferta; // Solo sin oferta
+                } else if (filterType === 'oferta') {
+                    tipoPrecioCumple = !!camiseta.precio_oferta; // Solo con oferta
+                }
+
+                return nombreCumple && precioCumple && tipoPrecioCumple;
+            });
+
+            mostrarCamisetas(camisetasFiltradas);
+        }
+
+        // Función para limpiar filtros
+        function limpiarFiltros() {
+            document.getElementById('search').value = '';
+            document.getElementById('minPrice').value = '';
+            document.getElementById('maxPrice').value = '';
+            document.getElementById('filterType').value = 'todos';
+            mostrarCamisetas(camisetasOriginales);
+        }
+
+        // Permitir buscar con Enter
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('search').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    filtrarCamisetas();
+                }
+            });
+        });
 
         // Función para crear una tarjeta
         function crearCard(camiseta) {
@@ -271,6 +556,10 @@
                 ? `$${parseFloat(camiseta.precio_oferta).toFixed(2)}`
                 : `$${parseFloat(camiseta.precio_normal).toFixed(2)}`;
 
+            const ofertaBadge = camiseta.precio_oferta 
+                ? '<span class="badge" style="background: #ff6b6b; margin-left: 8px;">⚡ OFERTA</span>'
+                : '';
+
             card.innerHTML = `
                 <div class="card-image">
                     ${imageHtml}
@@ -283,6 +572,7 @@
                         <div>
                             ${precioOferta}
                             <span class="price">${precio}</span>
+                            ${ofertaBadge}
                         </div>
                         <span class="badge badge-platform">${camiseta.plataforma.nombre}</span>
                     </div>
@@ -301,6 +591,7 @@
         }
 
         // Cargar camisetas al abrir la página
+        actualizarMenuAuth();
         loadCamisetas();
     </script>
 </body>

@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\AuthController;
 
 //Rutas Api 
 // 1. Rutas Públicas (Cualquiera entra)
+Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
  
 // Catálogo visible para todos (Solo Index y Show)
