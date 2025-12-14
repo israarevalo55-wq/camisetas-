@@ -37,4 +37,15 @@ class Camiseta extends Model
     {
         return $this->belongsToMany(Genero::class, 'camiseta_genero', 'camiseta_id', 'genero_id');
     }
-}
+
+    // Favoritos
+    public function favoritos()
+    {
+        return $this->hasMany(Favorito::class);
+    }
+
+    // Comentarios
+    public function comentarios()
+    {
+        return $this->hasMany(Comentario::class);
+    }

@@ -4,11 +4,17 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Camiseta;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
-use Saeedvir\Supabase\Facades\Supabase;
 
 class CamisetaController extends Controller
 {
+    protected $imageService;
+
+    public function __construct(ImageService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
     public function index(Request $request)
     {
         $query = Camiseta::with(['plataforma', 'generos'])->where('disponible', true);
@@ -43,20 +49,12 @@ class CamisetaController extends Controller
 
         $data = $request->all();
 
-        // Subir imagen a Supabase si existe
-        if ($request->hasFile('imagen')) {
-            $file = $request->file('imagen');
-            $filename = time() . '.' . $file->getClientOriginalExtension();
-            $bucket = env('SUPABASE_BUCKET');
-
-            Supabase::storage()->upload(
-                $bucket,
-                $filename,
-                $file->getPathname()
-            );
-
-            // Guardar URL pública en la tabla
-            $data['imagen_url'] = env('SUPABASE_URL') . "/storage/v1/object/public/{$bucket}/{$filename}";
+        // Subir imagen si existe
+        if ($request->hasFile('imagen') && $request->file('imagen')->isValid()) {
+            $imageUrl = $this->imageService->uploadImage($request->file('imagen'));
+            if ($imageUrl) {
+                $data['imagen_url'] = $imageUrl;
+            }
         }
 
         $camiseta = Camiseta::create($data);
@@ -115,17 +113,11 @@ class CamisetaController extends Controller
         $data = $request->all();
 
         // Subir nueva imagen si se envía
-        if ($request->hasFile('imagen')) {
-            $file = $request->file('imagen');
-            $filename = time() . '.' . $file->getClientOriginalExtension();
-            $bucket = env('SUPABASE_BUCKET');
-
-            Supabase::storage()->upload(
-            $bucket,
-            $filename,
-            file_get_contents($file)
-      );
-            $data['imagen_url'] = env('SUPABASE_URL') . "/storage/v1/object/public/{$bucket}/{$filename}";
+        if ($request->hasFile('imagen') && $request->file('imagen')->isValid()) {
+            $imageUrl = $this->imageService->uploadImage($request->file('imagen'));
+            if ($imageUrl) {
+                $data['imagen_url'] = $imageUrl;
+            }
         }
 
         $camiseta->update($data);

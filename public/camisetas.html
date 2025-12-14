@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameZone - Camisetas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 250px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .card-description {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .card-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .price {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .price-offer {
+            font-size: 0.9em;
+            color: #999;
+            text-decoration: line-through;
+            margin-right: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .badge-stock {
+            background: #28a745;
+        }
+
+        .badge-stock.low {
+            background: #ffc107;
+        }
+
+        .badge-platform {
+            background: #764ba2;
+        }
+
+        .generos {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .genero-tag {
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            color: #555;
+        }
+
+        .button {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .button:hover {
+            opacity: 0.9;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .no-image {
+            background: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 GameZone Store</h1>
+            <p>Encuentra las mejores camisetas gamer</p>
+        </header>
+
+        <div id="error-container"></div>
+        <div id="loading" class="loading">Cargando camisetas...</div>
+        <div id="grid" class="grid"></div>
+    </div>
+
+    <script>
+        // Función para cargar las camisetas
+        async function loadCamisetas() {
+            try {
+                const response = await fetch('http://localhost:8000/api/camisetas');
+                const data = await response.json();
+
+                document.getElementById('loading').style.display = 'none';
+
+                if (!data.success) {
+                    throw new Error('Error al cargar las camisetas');
+                }
+
+                const grid = document.getElementById('grid');
+                grid.innerHTML = '';
+
+                if (data.data.length === 0) {
+                    grid.innerHTML = '<p style="color: white; grid-column: 1/-1; text-align: center;">No hay camisetas disponibles</p>';
+                    return;
+                }
+
+                data.data.forEach(camiseta => {
+                    const card = crearCard(camiseta);
+                    grid.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error-container').innerHTML = `
+                    <div class="error">
+                        Error al cargar las camisetas: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Función para crear una tarjeta
+        function crearCard(camiseta) {
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            const stockClass = camiseta.stock <= 5 ? 'low' : '';
+            const stockText = camiseta.stock > 0 ? `${camiseta.stock} en stock` : 'Agotado';
+
+            let imageHtml = '';
+            if (camiseta.imagen_url) {
+                imageHtml = `<img src="${camiseta.imagen_url}" alt="${camiseta.nombre}" onerror="this.style.display='none'">`;
+            } else {
+                imageHtml = '<div class="no-image">Sin imagen</div>';
+            }
+
+            const generosHtml = camiseta.generos && camiseta.generos.length > 0
+                ? camiseta.generos.map(g => `<span class="genero-tag">${g.nombre}</span>`).join('')
+                : '';
+
+            const precioOferta = camiseta.precio_oferta 
+                ? `<span class="price-offer">$${parseFloat(camiseta.precio_normal).toFixed(2)}</span>`
+                : '';
+
+            const precio = camiseta.precio_oferta 
+                ? `$${parseFloat(camiseta.precio_oferta).toFixed(2)}`
+                : `$${parseFloat(camiseta.precio_normal).toFixed(2)}`;
+
+            card.innerHTML = `
+                <div class="card-image">
+                    ${imageHtml}
+                </div>
+                <div class="card-content">
+                    <div class="card-title">${camiseta.nombre}</div>
+                    <div class="card-description">${camiseta.descripcion || 'Sin descripción'}</div>
+                    
+                    <div class="card-info">
+                        <div>
+                            ${precioOferta}
+                            <span class="price">${precio}</span>
+                        </div>
+                        <span class="badge badge-platform">${camiseta.plataforma.nombre}</span>
+                    </div>
+
+                    <div>
+                        <span class="badge ${stockClass} badge-stock">${stockText}</span>
+                    </div>
+
+                    ${generosHtml ? `<div class="generos">${generosHtml}</div>` : ''}
+
+                    <button class="button">Ver Detalles</button>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // Cargar camisetas al abrir la página
+        loadCamisetas();
+    </script>
+</body>
+</html>
