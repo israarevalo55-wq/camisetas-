@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CamisetaController;
 use App\Http\Controllers\Api\FavoritoController;
 use App\Http\Controllers\Api\ComentarioController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CountryController;
 
 //Rutas Api 
 // 1. Rutas Públicas (Cualquiera entra)
@@ -18,6 +19,11 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/camisetas', [CamisetaController::class, 'index']);
 Route::get('/camisetas/{id}', [CamisetaController::class, 'show']);
 Route::get('/plataformas', [PlataformaController::class, 'index']);
+
+// API Externa: REST Countries (Información de países para envíos)
+Route::get('/countries', [CountryController::class, 'index']);
+Route::get('/countries/{code}', [CountryController::class, 'show']);
+Route::get('/countries/region/{region}', [CountryController::class, 'byRegion']);
 
 // Comentarios públicos (lectura)
 Route::get('/camisetas/{camisetaId}/comentarios', [ComentarioController::class, 'index']);

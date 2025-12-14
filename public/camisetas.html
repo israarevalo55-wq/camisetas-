@@ -87,6 +87,29 @@
             font-size: 0.9em;
         }
 
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .nav-links a {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border: 2px solid white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: white;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -359,6 +382,12 @@
         </header>
 
         <div id="error-container"></div>
+
+        <!-- Links de navegación -->
+        <div class="nav-links">
+            <a href="camisetas.html">🛍️ Catálogo</a>
+            <a href="paises.html">🌍 Países de Envío</a>
+        </div>
 
         <!-- Filtros y búsqueda -->
         <div class="filters-section">
